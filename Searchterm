@@ -1,6 +1,6 @@
 function main() {
 
-	var email_list = 'ashvien@maxlead.com' ;
+	var email_list = 'thijs.glass@orangevalley.nl' ;
 
 	var Days_Back_Start = 30; // Aantal Dagen Terug in de tijd Begin
 	var Days_Back_End = 1; // Aantal Dagen Terug in de tijd Eind
