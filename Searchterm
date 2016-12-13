@@ -1,0 +1,76 @@
+function main() {
+
+	var email_list = 'ashvien@maxlead.com' ;
+
+	var Days_Back_Start = 30; // Aantal Dagen Terug in de tijd Begin
+	var Days_Back_End = 1; // Aantal Dagen Terug in de tijd Eind
+
+	var Start_Date = getDateInThePast(Days_Back_Start);
+	var End_Date = getDateInThePast(Days_Back_End);
+	var Account = AdWordsApp.currentAccount().getName();
+
+	var report = AdWordsApp.report(
+		"SELECT Query, ConvertedClicks, Clicks, Impressions, CampaignName, AdGroupName, Cost " +
+		" FROM SEARCH_QUERY_PERFORMANCE_REPORT " +
+		" WHERE ConvertedClicks > 0 " +
+        " DURING  " + Start_Date + "," + End_Date);
+	//	" DURING  LAST_30_DAYS");
+
+	var reportName = "Rapport Conversies Niet in Account voor: " + Account;
+	var spreadsheet = SpreadsheetApp.create(reportName);
+	var sheet = spreadsheet.getActiveSheet();
+
+	sheet.getRange("A1").setValue(End_Date);
+	sheet.getRange("B1").setValue("Query ");
+	sheet.getRange("C1").setValue("ConvertedClicks ");
+	sheet.getRange("D1").setValue("Clicks ");
+	sheet.getRange("E1").setValue("Impressions ");
+	sheet.getRange("F1").setValue("Campaign ");
+	sheet.getRange("G1").setValue("Adgroup ");
+  	sheet.getRange("H1").setValue("Cost ");
+
+	var rownumber = 2;
+	var keywords = AdWordsApp.keywords()
+	.withCondition("KeywordMatchType = EXACT")
+	.withCondition("Status = ENABLED")
+	.withCondition("CampaignStatus = ENABLED")
+	.withCondition("AdGroupStatus = ENABLED")
+	.get();
+
+	var map = {}
+	while (keywords.hasNext()) {
+		var keyword = keywords.next();
+		map[keyword.getText().toLowerCase()] = keyword;
+	}         
+
+	var rows = report.rows();
+	while (rows.hasNext()) {
+		var row = rows.next();
+		var Query = "[" + row['Query'] + "]";
+
+		if(!(Query in map)) {
+			//update spreadsheet
+			sheet.getRange("B" + rownumber).setValue(row['Query']);   
+			sheet.getRange("C" + rownumber).setValue(row['ConvertedClicks']);
+			sheet.getRange("D" + rownumber).setValue(row['Clicks']);   
+			sheet.getRange("E" + rownumber).setValue(row['Impressions']);
+			sheet.getRange("F" + rownumber).setValue(row['CampaignName']);
+			sheet.getRange("G" + rownumber).setValue(row['AdGroupName']);
+            sheet.getRange("H" + rownumber).setValue(row['Cost']);
+			rownumber = rownumber + 1;
+		}
+	}
+
+	MailApp.sendEmail (email_list, reportName, spreadsheet.getUrl());
+	Logger.log("Rapport Conversies Niet in Account voor: '" + Account + "'");
+	Logger.log("https://docs.google.com/spreadsheet/ccc?key=" + spreadsheet.getId());
+
+}
+
+// Returns YYYYMMDD-formatted date.
+
+function getDateInThePast(numDays) {
+	var today = new Date();
+	today.setDate(today.getDate() - numDays);
+	return Utilities.formatDate(today, "PST", "yyyyMMdd");
+}
