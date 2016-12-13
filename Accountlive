@@ -16,7 +16,7 @@
    This script does NOT make changes to your account. It only emails when an account appears to have become inactive.
 */ 
 
-var EMAIL_ADDRESS_TO_NOTIFY = "ashvien@maxlead.com";
+var EMAIL_ADDRESS_TO_NOTIFY = "thijs.glass@orangevalley.nl";
 var NUM_HOURS_TO_CHECK = 2;
 var METRIC_TO_CHECK = "Impressions";
 
